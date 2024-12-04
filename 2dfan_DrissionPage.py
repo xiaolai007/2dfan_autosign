@@ -1,5 +1,5 @@
 from DrissionPage import Chromium
-from bypass_captcha import CaptchaBypasser,ImageMatcher
+from bypass_captcha import CaptchaBypasser
 import time
 import os
 import logging
@@ -41,7 +41,7 @@ try:
     captcha_bypasser = CaptchaBypasser()
     logging.info("运行验证码绕过程序...")
     captcha_bypasser.run()
-    time.sleep(6)
+    time.sleep(12)
 
     # 定位到登录按钮并点击
     logging.info("查找并点击登录按钮...")
@@ -51,72 +51,41 @@ try:
         logging.info("登录按钮已点击")
     else:
         raise RuntimeError("未找到登录按钮")
-    # time.sleep(16)
-    # 循环检测直到匹配成功
-    from pathlib import Path
-    logging.info("开始匹配截图与模板...")
-    match_found = False
-    timeout = 60  # 设置超时时间（秒）
-    start_time = time.time()
-
-    while not match_found:
-        if time.time() - start_time > timeout:
-            raise TimeoutError("匹配超时，未能检测到模板！")
-
-        # 截图保存到当前目录
-        tab.get_screenshot(name='current_screenshot.png', full_page=True)
-
-        screenshot_path = Path(__file__).parent / "current_screenshot.png"
-        template_path = Path(__file__).parent / "captcha-verify-you-are-human-eg.png"
-        # 实例化 ImageMatcher
-        image_matcher = ImageMatcher(
-            source_image_path=screenshot_path,
-            template_image_path=template_path,
-        )
-
-        # 计算匹配准确度
-        accuracy = image_matcher.accuracy()
-        logging.info(f"当前匹配准确度: {accuracy}")
-
-        if accuracy > 0.277:
-            logging.info("匹配成功，检测页面签到状态...")
-            match_found = True
-        else:
-            logging.info("匹配失败，等待4秒后重新检测...")
-            time.sleep(4)
-
-    tab.get_screenshot(name='pic1.png', full_page=True)
-
-    # 检测页面中是否包含“今日已签到”文本
-    checkin_status = tab.ele('text:今日已签到')
-    if checkin_status:
-        logging.info("已签到！")
-    else:
-        logging.info("未签到！")
-        # 再次检查验证码绕过
-        logging.info("再次运行验证码绕过程序...")
-        captcha_bypasser = CaptchaBypasser()
-        captcha_bypasser.run()
-        time.sleep(6)
-
-        # 定位到签到按钮并点击
-        logging.info("查找并点击签到按钮...")
-        checkin_button = tab.ele('@type=submit')
-        if checkin_button:
-            checkin_button.click()
-            logging.info("签到按钮已点击")
-        else:
-            raise RuntimeError("未找到签到按钮")
-        time.sleep(5)
-
-        tab.refresh()  # 刷新页面
+    # time.sleep(15)
+    if tab.wait.doc_loaded():
+        logging.info("页面加载完成")
+        tab.get_screenshot(name='pic1.png', full_page=True)
 
         # 检测页面中是否包含“今日已签到”文本
         checkin_status = tab.ele('text:今日已签到')
         if checkin_status:
-            logging.info("签到成功！")
+            logging.info("已签到！")
         else:
-            logging.info("签到失败！")
+            logging.info("未签到！")
+            # 再次检查验证码绕过
+            logging.info("再次运行验证码绕过程序...")
+            captcha_bypasser = CaptchaBypasser()
+            captcha_bypasser.run()
+            time.sleep(12)
+
+            # 定位到签到按钮并点击
+            logging.info("查找并点击签到按钮...")
+            checkin_button = tab.ele('@type=submit')
+            if checkin_button:
+                checkin_button.click()
+                logging.info("签到按钮已点击")
+            else:
+                raise RuntimeError("未找到签到按钮")
+            time.sleep(5)
+
+            tab.refresh()  # 刷新页面
+
+            # 检测页面中是否包含“今日已签到”文本
+            checkin_status = tab.ele('text:今日已签到')
+            if checkin_status:
+                logging.info("签到成功！")
+            else:
+                logging.info("签到失败！")
 
 except Exception as e:
     logging.error(f"运行过程中发生错误: {e}")

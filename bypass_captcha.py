@@ -69,7 +69,7 @@ class CaptchaBypasser:
 
         match_region = image_matcher.match()
         image_matcher.draw_rectangle()
-        logging.info("准确度：%s", image_matcher.accuracy())
+        # logging.info("准确度：%s", image_matcher.accuracy())
         match_region_in_monitor = (
             match_region[0] + monitor_left_offset,
             match_region[1] + monitor_top_offset,
