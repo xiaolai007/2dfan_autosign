@@ -69,8 +69,8 @@ class CaptchaBypasser:
             match_region[3] + monitor_top_offset,
         )
         checkbox_center = (
-            (match_region_in_monitor[0] + 60),
-            (match_region_in_monitor[1] + match_region_in_monitor[3]) / 2,
+            int(match_region_in_monitor[0] + 60),
+            int((match_region_in_monitor[1] + match_region_in_monitor[3]) / 2),
         )
 
         # 该处画点并保存图片
