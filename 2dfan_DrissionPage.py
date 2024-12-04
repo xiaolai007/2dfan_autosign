@@ -51,7 +51,7 @@ try:
         logging.info("登录按钮已点击")
     else:
         raise RuntimeError("未找到登录按钮")
-    time.sleep(15)
+    time.sleep(18)
     
     tab.get_screenshot(name='pic1.png', full_page=True)
 
@@ -61,7 +61,6 @@ try:
         logging.info("已签到！")
     else:
         logging.info("未签到！")
-        time.sleep(1)
         # 再次检查验证码绕过
         logging.info("再次运行验证码绕过程序...")
         captcha_bypasser = CaptchaBypasser()
