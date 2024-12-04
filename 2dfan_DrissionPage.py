@@ -20,6 +20,7 @@ try:
 
     # 定位到账号文本框并输入账号
     user_email = os.getenv('USER_EMAIL')
+    # user_email = "ai4869ei@gmail.com"
     if not user_email:
         raise ValueError("环境变量 USER_EMAIL 未设置")
     logging.info(f"输入账号：{user_email}")
@@ -27,6 +28,7 @@ try:
 
     # 定位到密码文本框并输入密码
     user_password = os.getenv('USER_PASSWORD')
+    # user_password = "HUst04233830"
     if not user_password:
         raise ValueError("环境变量 USER_PASSWORD 未设置")
     logging.info("输入密码")
@@ -34,14 +36,14 @@ try:
 
     # 等待页面加载
     logging.info("等待页面加载...")
-    time.sleep(8)
+    time.sleep(10)
 
     # 查找并点击“确认您是真人”复选框
     logging.info("初始化验证码绕过程序...")
     captcha_bypasser = CaptchaBypasser()
     logging.info("运行验证码绕过程序...")
     captcha_bypasser.run()
-    time.sleep(5)
+    time.sleep(8)
 
     # 定位到登录按钮并点击
     logging.info("查找并点击登录按钮...")
