@@ -6,3 +6,6 @@
      
 # 查看截图
 可以在`Actions`的`Artifacts`下载`screenshots.zip`文件查看。
+
+# 补充说明
+仅供参考，请多多支持2dfan运营。
