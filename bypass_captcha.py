@@ -69,7 +69,7 @@ class CaptchaBypasser:
             match_region[3] + monitor_top_offset,
         )
         checkbox_center = (
-            int(match_region_in_monitor[0] + 60),
+            int(match_region_in_monitor[0] + 45), #60
             int((match_region_in_monitor[1] + match_region_in_monitor[3]) / 2),
         )
 
