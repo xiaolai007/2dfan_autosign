@@ -1,5 +1,5 @@
 from DrissionPage import Chromium
-from bypass_captcha import CaptchaBypasser
+from bypass_captcha import CaptchaBypasser,ImageMatcher
 import time
 import os
 import logging
@@ -51,8 +51,38 @@ try:
         logging.info("登录按钮已点击")
     else:
         raise RuntimeError("未找到登录按钮")
-    time.sleep(16)
-    
+    # time.sleep(16)
+    # 循环检测直到匹配成功
+    logging.info("开始匹配截图与模板...")
+    match_found = False
+    timeout = 60  # 设置超时时间（秒）
+    start_time = time.time()
+
+    while not match_found:
+        if time.time() - start_time > timeout:
+            raise TimeoutError("匹配超时，未能检测到模板！")
+
+        # 截图保存到当前目录
+        screenshot_path = "current_screenshot.png"
+        tab.get_screenshot(name=screenshot_path, full_page=True)
+
+        # 实例化 ImageMatcher
+        image_matcher = ImageMatcher(
+            source_image_path=screenshot_path,
+            template_image_path="captcha-verify-you-are-human-eg.png",
+        )
+
+        # 计算匹配准确度
+        accuracy = image_matcher.accuracy()
+        logging.info(f"当前匹配准确度: {accuracy}")
+
+        if accuracy > 0.25:
+            logging.info("匹配成功，检测页面签到状态...")
+            match_found = True
+        else:
+            logging.info("匹配失败，等待1秒后重新检测...")
+            time.sleep(1)
+
     tab.get_screenshot(name='pic1.png', full_page=True)
 
     # 检测页面中是否包含“今日已签到”文本
