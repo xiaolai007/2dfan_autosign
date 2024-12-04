@@ -41,7 +41,7 @@ try:
     captcha_bypasser = CaptchaBypasser()
     logging.info("运行验证码绕过程序...")
     captcha_bypasser.run()
-    time.sleep(12)
+    time.sleep(6)
 
     # 定位到登录按钮并点击
     logging.info("查找并点击登录按钮...")
@@ -78,7 +78,7 @@ try:
         accuracy = image_matcher.accuracy()
         logging.info(f"当前匹配准确度: {accuracy}")
 
-        if accuracy > 0.25:
+        if accuracy > 0.277:
             logging.info("匹配成功，检测页面签到状态...")
             match_found = True
         else:
@@ -97,7 +97,7 @@ try:
         logging.info("再次运行验证码绕过程序...")
         captcha_bypasser = CaptchaBypasser()
         captcha_bypasser.run()
-        time.sleep(12)
+        time.sleep(6)
 
         # 定位到签到按钮并点击
         logging.info("查找并点击签到按钮...")
