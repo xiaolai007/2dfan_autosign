@@ -37,6 +37,13 @@ class ImageMatcher:
             thickness=2,
         )
         cv2.imwrite(str(self.detected_image_path), self.source_image)
+    
+    def accuracy(self):
+        res = cv2.matchTemplate(
+            self.source_image, self.template_image, cv2.TM_CCOEFF_NORMED
+        )
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        return max_val
 
 
 class CaptchaBypasser:
@@ -62,6 +69,7 @@ class CaptchaBypasser:
 
         match_region = image_matcher.match()
         image_matcher.draw_rectangle()
+        print("准确度：", image_matcher.accuracy())
         match_region_in_monitor = (
             match_region[0] + monitor_left_offset,
             match_region[1] + monitor_top_offset,
