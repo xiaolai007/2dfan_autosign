@@ -47,5 +47,5 @@ jobs:
       with:
         name: screenshots
         path: |
-          2dfan_DrissionPage.py/../screenshot.png
-          2dfan_DrissionPage.py/../screenshot_detected.png
+          ./screenshot.png
+          ./screenshot_detected.png
