@@ -21,18 +21,13 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y xvfb libx11-dev xauth x11vnc fonts-noto-cjk  # 安装中文字体及VNC支持
+        sudo apt-get install -y xvfb libx11-dev xauth fonts-noto-cjk  # 安装中文字体
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Start Xvfb and VNC server
+    - name: Start Xvfb
       run: |
-        # 启动 Xvfb 虚拟屏幕
         nohup Xvfb :99 -screen 0 1280x1024x24 &
-        export DISPLAY=:99
-        
-        # 启动 x11vnc 服务器，监听 localhost 并允许连接
-        x11vnc -display :99 -nopw -listen localhost -xkb &
 
     - name: Set DISPLAY and XAUTHORITY environment variables
       run: |
@@ -47,15 +42,10 @@ jobs:
       run: |
         python 2dfan_DrissionPage.py
 
-    - name: Capture screenshot of virtual screen
-      run: |
-        # 截取 Xvfb 屏幕并保存为 screenshot.png
-        xwd -root -display :99 | convert xwd:- screenshot.png
-
     - name: Upload screenshots as artifacts
       uses: actions/upload-artifact@v3
       with:
         name: screenshots
         path: |
-          screenshot.png
-          screenshot_detected.png
+          ./screenshot.png
+          ./screenshot_detected.png
