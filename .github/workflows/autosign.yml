@@ -41,3 +41,11 @@ jobs:
         USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
       run: |
         python 2dfan_DrissionPage.py
+
+    - name: Upload screenshots as artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: screenshots
+        path: |
+          2dfan_DrissionPage.py/../screenshot.png
+          2dfan_DrissionPage.py/../screenshot_detected.png
