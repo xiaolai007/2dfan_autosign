@@ -7,7 +7,7 @@ import time
 from mss import mss
 from pathlib import Path
 from PIL import Image, ImageGrab
-
+import logging
 class ImageMatcher:
     def __init__(self, source_image_path, template_image_path):
         self.source_image = cv2.imread(str(source_image_path))
@@ -69,7 +69,7 @@ class CaptchaBypasser:
 
         match_region = image_matcher.match()
         image_matcher.draw_rectangle()
-        print("准确度：", image_matcher.accuracy())
+        logging.info("准确度：%s", image_matcher.accuracy())
         match_region_in_monitor = (
             match_region[0] + monitor_left_offset,
             match_region[1] + monitor_top_offset,
