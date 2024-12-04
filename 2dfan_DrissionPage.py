@@ -82,8 +82,8 @@ try:
             logging.info("匹配成功，检测页面签到状态...")
             match_found = True
         else:
-            logging.info("匹配失败，等待1秒后重新检测...")
-            time.sleep(1)
+            logging.info("匹配失败，等待4秒后重新检测...")
+            time.sleep(4)
 
     tab.get_screenshot(name='pic1.png', full_page=True)
 
