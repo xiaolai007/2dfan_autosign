@@ -52,3 +52,4 @@ jobs:
         path: |
           ./screenshot.png
           ./screenshot_detected.png
+          ./screenshot2.png"

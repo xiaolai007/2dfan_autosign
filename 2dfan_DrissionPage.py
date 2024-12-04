@@ -55,6 +55,10 @@ try:
         raise RuntimeError("未找到登录按钮")
     time.sleep(8)
     
+    from PIL import Image, ImageGrab
+    from pathlib import Path
+    imgp = Path(__file__).parent / "screenshot2.png"
+    ImageGrab.grab(all_screens=True).save(imgp)
     # 检测页面中是否包含“今日已签到”文本
     checkin_status = tab.ele('text:今日已签到')
     if checkin_status:
