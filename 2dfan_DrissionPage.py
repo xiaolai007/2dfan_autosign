@@ -61,6 +61,7 @@ try:
         logging.info("已签到！")
     else:
         logging.info("未签到！")
+
         # 再次检查验证码绕过
         logging.info("再次运行验证码绕过程序...")
         captcha_bypasser = CaptchaBypasser()
