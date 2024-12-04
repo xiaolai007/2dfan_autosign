@@ -53,6 +53,7 @@ try:
         raise RuntimeError("未找到登录按钮")
     # time.sleep(16)
     # 循环检测直到匹配成功
+    from pathlib import Path
     logging.info("开始匹配截图与模板...")
     match_found = False
     timeout = 60  # 设置超时时间（秒）
@@ -63,13 +64,14 @@ try:
             raise TimeoutError("匹配超时，未能检测到模板！")
 
         # 截图保存到当前目录
-        screenshot_path = "current_screenshot.png"
-        tab.get_screenshot(name=screenshot_path, full_page=True)
+        tab.get_screenshot(name='current_screenshot.png', full_page=True)
 
+        screenshot_path = Path(__file__).parent / "current_screenshot.png"
+        template_path = Path(__file__).parent / "captcha-verify-you-are-human-eg.png"
         # 实例化 ImageMatcher
         image_matcher = ImageMatcher(
             source_image_path=screenshot_path,
-            template_image_path="captcha-verify-you-are-human-eg.png",
+            template_image_path=template_path,
         )
 
         # 计算匹配准确度
