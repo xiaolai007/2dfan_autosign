@@ -42,7 +42,7 @@ class ImageMatcher:
 class CaptchaBypasser:
     def __init__(self):
         self.captcha_image_path = (
-            Path(__file__).parent / "captcha-verify-you-are-human-eg.png"
+            Path(__file__).parent / "captcha-verify-you-are-human-eg.png"  # 自动部署图片加eg，本地不加
         )
         self.screen_shot_image_path = Path(__file__).parent / "screenshot.png"
 
@@ -69,7 +69,7 @@ class CaptchaBypasser:
             match_region[3] + monitor_top_offset,
         )
         checkbox_center = (
-            int(match_region_in_monitor[0] + 40), #60
+            int(match_region_in_monitor[0] + 40), #本地60 自动部署40
             int((match_region_in_monitor[1] + match_region_in_monitor[3]) / 2),
         )
 
@@ -77,7 +77,7 @@ class CaptchaBypasser:
         cv2.circle(
             img=image_matcher.source_image,
             center=checkbox_center,
-            radius=5,
+            radius=2,
             color=(0, 0, 255),
             thickness=-1,
         )
