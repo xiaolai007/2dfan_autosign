@@ -34,17 +34,20 @@ try:
     logging.info("输入密码")
     tab.ele('@name=password').input(user_password)
 
+    # 对整页截图并保存
+    tab.get_screenshot(name='pic1.png', full_page=True)
     # 等待页面加载
     logging.info("等待页面加载...")
     time.sleep(6)
-
+    tab.get_screenshot(name='pic2.png', full_page=True)
     # 查找并点击“确认您是真人”复选框
     logging.info("初始化验证码绕过程序...")
     captcha_bypasser = CaptchaBypasser()
     logging.info("运行验证码绕过程序...")
     captcha_bypasser.run()
+    tab.get_screenshot(name='pic3.png', full_page=True)
     time.sleep(3)
-
+    tab.get_screenshot(name='pic4.png', full_page=True)
     # 定位到登录按钮并点击
     logging.info("查找并点击登录按钮...")
     login_button = tab.ele('@type=submit')
@@ -53,23 +56,23 @@ try:
         logging.info("登录按钮已点击")
     else:
         raise RuntimeError("未找到登录按钮")
+    tab.get_screenshot(name='pic6.png', full_page=True)
     time.sleep(8)
     
-    from PIL import Image, ImageGrab
-    from pathlib import Path
-    imgp = Path(__file__).parent / "screenshot2.png"
-    ImageGrab.grab(all_screens=True).save(imgp)
+    tab.get_screenshot(name='pic7.png', full_page=True)
+
     # 检测页面中是否包含“今日已签到”文本
     checkin_status = tab.ele('text:今日已签到')
     if checkin_status:
         logging.info("已签到！")
     else:
         logging.info("未签到！")
-
+        tab.get_screenshot(name='pic8.png', full_page=True)
         # 再次检查验证码绕过
         logging.info("再次运行验证码绕过程序...")
         captcha_bypasser = CaptchaBypasser()
         captcha_bypasser.run()
+        tab.get_screenshot(name='pic9.png', full_page=True)
         time.sleep(4)
 
         # 定位到签到按钮并点击
