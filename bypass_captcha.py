@@ -42,7 +42,7 @@ class ImageMatcher:
 class CaptchaBypasser:
     def __init__(self):
         self.captcha_image_path = (
-            Path(__file__).parent / "captcha-verify-you-are-human.png"
+            Path(__file__).parent / "captcha-verify-you-are-human-eg.png"
         )
         self.screen_shot_image_path = Path(__file__).parent / "screenshot.png"
 

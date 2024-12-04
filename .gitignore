@@ -1,2 +1,3 @@
 *.png
 !captcha-verify-you-are-human.png
+!captcha-verify-you-are-human-eg.png
