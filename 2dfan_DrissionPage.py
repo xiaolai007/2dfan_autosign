@@ -53,34 +53,39 @@ try:
         logging.info("登录按钮已点击")
     else:
         raise RuntimeError("未找到登录按钮")
-    time.sleep(10)
+    time.sleep(8)
     
-
-
-    # 再次检查验证码绕过
-    logging.info("再次运行验证码绕过程序...")
-    captcha_bypasser = CaptchaBypasser()
-    captcha_bypasser.run()
-    time.sleep(4)
-
-    # 定位到签到按钮并点击
-    logging.info("查找并点击签到按钮...")
-    checkin_button = tab.ele('@type=submit')
-    if checkin_button:
-        checkin_button.click()
-        logging.info("签到按钮已点击")
-    else:
-        raise RuntimeError("未找到签到按钮")
-    time.sleep(3)
-
-    tab.refresh()  # 刷新页面
-
-        # 检测页面中是否包含“今日已签到”文本
+    # 检测页面中是否包含“今日已签到”文本
     checkin_status = tab.ele('text:今日已签到')
     if checkin_status:
-        logging.info("签到成功！")
+        logging.info("已签到！")
     else:
-        logging.info("签到失败！")
+        logging.info("未签到！")
+
+        # 再次检查验证码绕过
+        logging.info("再次运行验证码绕过程序...")
+        captcha_bypasser = CaptchaBypasser()
+        captcha_bypasser.run()
+        time.sleep(4)
+
+        # 定位到签到按钮并点击
+        logging.info("查找并点击签到按钮...")
+        checkin_button = tab.ele('@type=submit')
+        if checkin_button:
+            checkin_button.click()
+            logging.info("签到按钮已点击")
+        else:
+            raise RuntimeError("未找到签到按钮")
+        time.sleep(3)
+
+        tab.refresh()  # 刷新页面
+
+        # 检测页面中是否包含“今日已签到”文本
+        checkin_status = tab.ele('text:今日已签到')
+        if checkin_status:
+            logging.info("签到成功！")
+        else:
+            logging.info("签到失败！")
 
 except Exception as e:
     logging.error(f"运行过程中发生错误: {e}")

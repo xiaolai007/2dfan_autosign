@@ -72,6 +72,16 @@ class CaptchaBypasser:
             (match_region_in_monitor[0] + 60),
             (match_region_in_monitor[1] + match_region_in_monitor[3]) / 2,
         )
+
+        # 该处画点并保存图片
+        cv2.circle(
+            img=image_matcher.source_image,
+            center=checkbox_center,
+            radius=5,
+            color=(0, 0, 255),
+            thickness=-1,
+        )
+        cv2.imwrite(str(image_matcher.detected_image_path), image_matcher.source_image)
         return checkbox_center
 
     def click_target_checkbox(self):
