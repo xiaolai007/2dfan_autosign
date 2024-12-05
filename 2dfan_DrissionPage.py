@@ -29,7 +29,7 @@ def locate_button(ele, tag="tag:svg", retries=MAX_RETRIES):
 
 def process_captcha(tab, eles, tag="tag:circle"):
     """
-    验证验证码并等待按钮显示。
+    定位验证码中相关元素并返回该元素。
     """
     for ele in eles:
         if "name" in ele.attrs and "type" in ele.attrs:
@@ -64,7 +64,7 @@ def main():
             raise ValueError("环境变量 USER_PASSWORD 未设置")
         logging.info("输入密码")
         tab.ele('@name=password').input(user_password)
-
+        
         tab.wait.eles_loaded("tag:input")
         eles = tab.eles("tag:input")
 
