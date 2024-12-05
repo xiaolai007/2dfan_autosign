@@ -51,7 +51,8 @@ try:
         logging.info("登录按钮已点击")
     else:
         raise RuntimeError("未找到登录按钮")
-    time.sleep(18)
+    tab.wait.doc_loaded()
+    time.sleep(10)
     
     tab.get_screenshot(name='pic1.png', full_page=True)
 
