@@ -98,6 +98,8 @@ def main():
 
         # 等待页面加载
         tab.wait.new_tab()
+        tab.wait.eles_loaded("tag:input")
+        eles = tab.eles("tag:input")
         logging.info("登录成功")
         tab.get_screenshot(name='pic2.png', full_page=True)
 
