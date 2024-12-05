@@ -72,7 +72,7 @@ def main():
         button = process_captcha(tab, eles, tag="tag:svg")
         tab.wait.ele_hidden(button)
         logging.info("开始验证")
-        tab.wait(1)
+        tab.wait(3)
 
         # 初始化验证码绕过程序
         logging.info("初始化验证码绕过程序...")
@@ -84,7 +84,7 @@ def main():
         button = process_captcha(tab, eles, tag="tag:circle")
         tab.wait.ele_displayed(button)
         logging.info("验证成功")
-        tab.wait(1)
+        tab.wait(3)
         tab.get_screenshot(name='pic1.png', full_page=True)
 
         # 点击登录按钮
@@ -116,7 +116,7 @@ def main():
             button = process_captcha(tab, eles, tag="tag:circle")
             tab.wait.ele_displayed(button)
             logging.info("验证成功")
-            tab.wait(1)
+            tab.wait(3)
             tab.get_screenshot(name='pic3.png', full_page=True)
 
             # 点击签到按钮
