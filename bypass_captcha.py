@@ -2,12 +2,10 @@
 
 import cv2
 import pyautogui
-import random
-import time
 from mss import mss
 from pathlib import Path
-from PIL import Image, ImageGrab
-import logging
+from PIL import ImageGrab
+
 class ImageMatcher:
     def __init__(self, source_image_path, template_image_path):
         self.source_image = cv2.imread(str(source_image_path))
@@ -38,14 +36,6 @@ class ImageMatcher:
         )
         cv2.imwrite(str(self.detected_image_path), self.source_image)
     
-    def accuracy(self):
-        res = cv2.matchTemplate(
-            self.source_image, self.template_image, cv2.TM_CCOEFF_NORMED
-        )
-        _, max_val, _, _ = cv2.minMaxLoc(res)
-        return max_val
-
-
 class CaptchaBypasser:
     def __init__(self):
         self.captcha_image_path = (
@@ -69,7 +59,6 @@ class CaptchaBypasser:
 
         match_region = image_matcher.match()
         image_matcher.draw_rectangle()
-        # logging.info("准确度：%s", image_matcher.accuracy())
         match_region_in_monitor = (
             match_region[0] + monitor_left_offset,
             match_region[1] + monitor_top_offset,
