@@ -67,7 +67,7 @@ try:
         captcha_bypasser = CaptchaBypasser()
         captcha_bypasser.run()
         time.sleep(12)
-
+        tab.get_screenshot(name='pic2.png', full_page=True)
         # 定位到签到按钮并点击
         logging.info("查找并点击签到按钮...")
         checkin_button = tab.ele('@type=submit')
@@ -77,9 +77,10 @@ try:
         else:
             raise RuntimeError("未找到签到按钮")
         time.sleep(5)
-
+        tab.get_screenshot(name='pic3.png', full_page=True)
         tab.refresh()  # 刷新页面
-
+        time.sleep(5)
+        tab.get_screenshot(name='pic4.png', full_page=True)
         # 检测页面中是否包含“今日已签到”文本
         checkin_status = tab.ele('text:今日已签到')
         if checkin_status:
