@@ -31,7 +31,7 @@ try:
         raise ValueError("环境变量 USER_PASSWORD 未设置")
     logging.info("输入密码")
     tab.ele('@name=password').input(user_password)
-
+    tab.get_screenshot(name='pic0.png', full_page=True)
     # 等待页面加载
     logging.info("等待页面加载...")
     time.sleep(12)
@@ -41,8 +41,9 @@ try:
     captcha_bypasser = CaptchaBypasser()
     logging.info("运行验证码绕过程序...")
     captcha_bypasser.run()
+    tab.get_screenshot(name='pic5.png', full_page=True)
     time.sleep(12)
-
+    tab.get_screenshot(name='pic6.png', full_page=True)
     # 定位到登录按钮并点击
     logging.info("查找并点击登录按钮...")
     login_button = tab.ele('@type=submit')
