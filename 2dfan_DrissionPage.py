@@ -127,6 +127,7 @@ def main():
                     logging.warning("仍处于登录页面，重新尝试登录...")
                     tab.refresh()
                     tab.wait.doc_loaded()
+                    tab.get_screenshot(name='pic_error.png', full_page=True)
                 else:
                     logging.info("成功跳转到主页，继续后续操作...")
                     break  # 登录成功，退出循环
