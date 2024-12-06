@@ -45,7 +45,15 @@ def main():
     try:
         # 启动浏览器
         logging.info("启动浏览器...")
-        tab = ChromiumPage()
+        co = ChromiumOptions()
+        # 禁止所有弹出窗口
+        # co.set_pref(arg='profile.default_content_settings.popups', value='0')
+        # # 隐藏是否保存密码的提示
+        # co.set_pref('credentials_enable_service', False)
+
+        #设置无痕模式
+        co.incognito(True)
+        tab = ChromiumPage(co)
 
         # 跳转到登录页面
         logging.info("跳转到登录页面...")
@@ -104,13 +112,8 @@ def main():
         logging.info("登录成功")
         tab.get_screenshot(name='pic2.png', full_page=True)
 
-        # 禁止所有弹出窗口
-        co = ChromiumOptions()
-        co.set_pref(arg='profile.default_content_settings.popups', value='0')
-        # 隐藏是否保存密码的提示
-        co.set_pref('credentials_enable_service', False)
         tab.get_screenshot(name='pic3.png', full_page=True)
-        
+
         # 检测签到状态
         checkin_status = tab.ele('text:今日已签到')
         if checkin_status:
