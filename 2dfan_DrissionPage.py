@@ -111,6 +111,7 @@ def main():
             logging.info("未签到，尝试签到...")
 
             # 再次运行验证码绕过程序
+            tab.wait(3)
             logging.info("再次运行验证码绕过程序...")
             captcha_bypasser.run()
 
