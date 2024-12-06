@@ -114,16 +114,18 @@ def main():
             tab.wait(3)
             logging.info("再次运行验证码绕过程序...")
             captcha_bypasser.run()
+            tab.get_screenshot(name='pic3.png', full_page=True)
 
             # 检验是否成功
             button = process_captcha(tab, eles, tag="tag:circle")
             tab.wait.ele_displayed(button)
             logging.info("验证成功")
-            tab.wait(3)
-            tab.get_screenshot(name='pic3.png', full_page=True)
+            tab.get_screenshot(name='pic4.png', full_page=True)
+            tab.wait(1)
 
             # 点击签到按钮
             logging.info("查找并点击签到按钮...")
+            tab.get_screenshot(name='pic5.png', full_page=True)
             checkin_button = tab.ele('@type=submit')
             if checkin_button:
                 checkin_button.click()
@@ -132,11 +134,12 @@ def main():
                 raise RuntimeError("未找到签到按钮")
 
             tab.wait(5)
-            tab.get_screenshot(name='pic4.png', full_page=True)
+            tab.get_screenshot(name='pic6.png', full_page=True)
             tab.refresh()
             tab.wait.doc_loaded()
             tab.wait(3)
-
+            logging.info("刷新页面成功")
+            tab.get_screenshot(name='pic7.png', full_page=True)
             # 检测签到状态
             checkin_status = tab.ele('text:今日已签到')
             if checkin_status:
