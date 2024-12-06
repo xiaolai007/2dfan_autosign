@@ -93,7 +93,7 @@ def main():
         button = process_captcha(tab, eles, tag="tag:circle")
         tab.wait.ele_displayed(button)
         logging.info("验证成功")
-        tab.wait(3)
+        tab.wait(2)
         tab.get_screenshot(name='pic1.png', full_page=True)
 
         # 点击登录按钮
@@ -110,6 +110,7 @@ def main():
         tab.wait.eles_loaded("tag:input")
         eles = tab.eles("tag:input")
         logging.info("登录成功")
+        tab.get_screenshot(name='pic2.png', full_page=True)
 
         # 检测签到状态
         checkin_status = tab.ele('text:今日已签到')
@@ -127,7 +128,7 @@ def main():
             tab.wait.ele_displayed(button)
             logging.info("验证成功")
             tab.wait(2)
-            tab.get_screenshot(name='pic2.png', full_page=True)
+            tab.get_screenshot(name='pic3.png', full_page=True)
 
             # 点击签到按钮
             logging.info("查找并点击签到按钮...")
