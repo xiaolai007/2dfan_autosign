@@ -2,6 +2,7 @@ import time, os
 import logging
 from DrissionPage import ChromiumPage
 from bypass_captcha import CaptchaBypasser
+from DrissionPage import ChromiumOptions
 
 # 配置日志记录
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -103,9 +104,14 @@ def main():
         logging.info("登录成功")
         tab.get_screenshot(name='pic2.png', full_page=True)
 
-        # 检测签到状态
-        tab.set.auto_handle_alert()  # 这之后出现的弹窗都会自动确认
+        # 禁止所有弹出窗口
+        co = ChromiumOptions()
+        co.set_pref(arg='profile.default_content_settings.popups', value='0')
+        # 隐藏是否保存密码的提示
+        co.set_pref('credentials_enable_service', False)
         tab.get_screenshot(name='pic3.png', full_page=True)
+        
+        # 检测签到状态
         checkin_status = tab.ele('text:今日已签到')
         if checkin_status:
             logging.info("今日已签到！")
@@ -113,7 +119,6 @@ def main():
             logging.info("未签到，尝试签到...")
 
             # 再次运行验证码绕过程序
-            tab.wait(3)
             logging.info("再次运行验证码绕过程序...")
             captcha_bypasser.run()
 
