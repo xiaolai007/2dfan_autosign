@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 # 全局变量
 LOGIN_URL = "https://2dfan.com/users/421136/recheckin"
 MAX_RETRIES = 3     # 最大重试次数
+MAX_LOGIN_ATTEMPTS = 3  # 最大重新登录次数
 
 def locate_button(ele, tag="tag:svg", retries=MAX_RETRIES):
     """
@@ -41,6 +42,54 @@ def process_captcha(tab, eles, tag="tag:circle"):
                 return button
     raise RuntimeError("未找到验证码相关按钮")
 
+def login_process(tab):
+    """
+    执行登录的输入账号、密码和验证码绕过的流程。
+    """
+    # 输入账号
+    user_email = os.getenv("USER_EMAIL", "")
+    if not user_email:
+        raise ValueError("环境变量 USER_EMAIL 未设置")
+    logging.info(f"输入账号: {user_email}")
+    tab.ele('@name=login').input(user_email)
+
+    # 输入密码
+    user_password = os.getenv("USER_PASSWORD", "")
+    if not user_password:
+        raise ValueError("环境变量 USER_PASSWORD 未设置")
+    logging.info("输入密码")
+    tab.ele('@name=password').input(user_password)
+
+    # 验证验证码
+    tab.wait.eles_loaded("tag:input")
+    eles = tab.eles("tag:input")
+    button = process_captcha(tab, eles, tag="tag:svg")
+    tab.wait.ele_hidden(button)
+    logging.info("开始验证")
+    tab.wait(3)
+
+    # 初始化验证码绕过程序
+    logging.info("初始化验证码绕过程序...")
+    captcha_bypasser = CaptchaBypasser()
+    logging.info("运行验证码绕过程序...")
+    captcha_bypasser.run()
+
+    # 检验是否成功
+    button = process_captcha(tab, eles, tag="tag:circle")
+    tab.wait.ele_displayed(button)
+    logging.info("验证成功")
+    tab.wait(2)
+    tab.get_screenshot(name='pic1.png', full_page=True)
+
+    # 点击登录按钮
+    logging.info("查找并点击登录按钮...")
+    login_button = tab.ele('@type=submit')
+    if login_button:
+        login_button.click()
+        logging.info("登录按钮已点击")
+    else:
+        raise RuntimeError("未找到登录按钮")
+    
 def main():
     try:
         # 启动浏览器
@@ -60,53 +109,35 @@ def main():
         tab.get(LOGIN_URL)
         logging.info("已跳转到登录页面")
 
-        # 输入账号
-        user_email = os.getenv("USER_EMAIL", "")
-        if not user_email:
-            raise ValueError("环境变量 USER_EMAIL 未设置")
-        logging.info(f"输入账号: {user_email}")
-        tab.ele('@name=login').input(user_email)
+        login_attempts = 0  # 登录尝试计数
+        while login_attempts < MAX_LOGIN_ATTEMPTS:
+            login_attempts += 1
+            logging.info(f"执行登录流程（尝试第 {login_attempts} 次）...")
+            
+            # 执行登录流程
+            try:
+                login_process(tab)
 
-        # 输入密码
-        user_password = os.getenv("USER_PASSWORD", "")
-        if not user_password:
-            raise ValueError("环境变量 USER_PASSWORD 未设置")
-        logging.info("输入密码")
-        tab.ele('@name=password').input(user_password)
-        
-        tab.wait.eles_loaded("tag:input")
-        eles = tab.eles("tag:input")
+                # 检查当前页面URL
+                tab.wait.new_tab()
+                current_url = tab.url
+                logging.info(f"当前页面URL: {current_url}")
 
-        # 验证验证码
-        button = process_captcha(tab, eles, tag="tag:svg")
-        tab.wait.ele_hidden(button)
-        logging.info("开始验证")
-        tab.wait(3)
+                if current_url == "https://2dfan.com/users/sign_in":
+                    logging.warning("仍处于登录页面，重新尝试登录...")
+                    tab.refresh()
+                    tab.wait.doc_loaded()
+                else:
+                    logging.info("成功跳转到主页，继续后续操作...")
+                    break  # 登录成功，退出循环
+            except Exception as e:
+                logging.error(f"登录尝试失败: {e}")
 
-        # 初始化验证码绕过程序
-        logging.info("初始化验证码绕过程序...")
-        captcha_bypasser = CaptchaBypasser()
-        logging.info("运行验证码绕过程序...")
-        captcha_bypasser.run()
-
-        # 检验是否成功
-        button = process_captcha(tab, eles, tag="tag:circle")
-        tab.wait.ele_displayed(button)
-        logging.info("验证成功")
-        tab.wait(2)
-        tab.get_screenshot(name='pic1.png', full_page=True)
-
-        # 点击登录按钮
-        logging.info("查找并点击登录按钮...")
-        login_button = tab.ele('@type=submit')
-        if login_button:
-            login_button.click()
-            logging.info("登录按钮已点击")
         else:
-            raise RuntimeError("未找到登录按钮")
+            logging.error("达到最大登录尝试次数，退出程序")
+            return
 
         # 等待页面加载
-        tab.wait.new_tab()
         tab.wait.eles_loaded("tag:input")
         eles = tab.eles("tag:input")
         logging.info("登录成功")
@@ -121,6 +152,7 @@ def main():
 
             # 再次运行验证码绕过程序
             logging.info("再次运行验证码绕过程序...")
+            captcha_bypasser = CaptchaBypasser()
             captcha_bypasser.run()
 
             # 检验是否成功
