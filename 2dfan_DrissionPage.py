@@ -51,7 +51,7 @@ def main():
         # # 隐藏是否保存密码的提示
         # co.set_pref('credentials_enable_service', False)
 
-        #设置无痕模式，防止弹出是否保存密码的提示
+        #设置无痕模式，防止弹出是否保存密码的提示.
         co.incognito(True)
         tab = ChromiumPage(co)
 
