@@ -104,6 +104,8 @@ def main():
         tab.get_screenshot(name='pic2.png', full_page=True)
 
         # 检测签到状态
+        tab.set.auto_handle_alert()  # 这之后出现的弹窗都会自动确认
+        tab.get_screenshot(name='pic3.png', full_page=True)
         checkin_status = tab.ele('text:今日已签到')
         if checkin_status:
             logging.info("今日已签到！")
@@ -114,7 +116,6 @@ def main():
             tab.wait(3)
             logging.info("再次运行验证码绕过程序...")
             captcha_bypasser.run()
-            tab.get_screenshot(name='pic3.png', full_page=True)
 
             # 检验是否成功
             button = process_captcha(tab, eles, tag="tag:circle")
