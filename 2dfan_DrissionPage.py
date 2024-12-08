@@ -3,6 +3,7 @@ import logging
 from DrissionPage import ChromiumPage
 from bypass_captcha import CaptchaBypasser
 from DrissionPage import ChromiumOptions
+from datetime import datetime
 
 # 配置日志记录
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -148,6 +149,9 @@ def main():
         checkin_status = tab.ele('text:今日已签到')
         if checkin_status:
             logging.info("今日已签到！")
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            with open("failure_flag.txt", "w") as f:
+                f.write(f"Sign-in failed at {timestamp}")
         else:
             logging.info("未签到，尝试签到...")
 

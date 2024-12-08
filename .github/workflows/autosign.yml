@@ -46,6 +46,16 @@ jobs:
       run: |
         python 2dfan_DrissionPage.py
 
+    - name: Check for failure
+      if: always()  # 确保此步骤无论之前是否失败都运行
+      run: |
+        if [ -f "./failure_flag.txt" ]; then
+          echo "Sign-in failed, sending email notification..."
+          exit 1
+        else
+          echo "Sign-in succeeded."
+        fi
+        
     - name: Upload screenshots as artifacts
       uses: actions/upload-artifact@v3
       with:
