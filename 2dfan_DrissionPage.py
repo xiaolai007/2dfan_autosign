@@ -8,7 +8,6 @@ from DrissionPage import ChromiumOptions
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # 全局变量
-LOGIN_URL = "https://2dfan.com/users/421136/recheckin"
 MAX_RETRIES = 3     # 最大重试次数
 MAX_LOGIN_ATTEMPTS = 3  # 最大重新登录次数
 
@@ -106,6 +105,11 @@ def main():
 
         # 跳转到登录页面
         logging.info("跳转到登录页面...")
+
+        # 从环境变量读取登录URL
+        LOGIN_URL = os.getenv("LOGIN_URL", "")
+        if not LOGIN_URL:
+            raise ValueError("环境变量 LOGIN_URL 未设置")
         tab.get(LOGIN_URL)
         logging.info("已跳转到登录页面")
 
@@ -184,11 +188,12 @@ def main():
                 logging.info("签到成功！")
             else:
                 logging.info("签到失败！")
-                with open("failure_flag.txt", "w") as f:
-                    f.write("Sign-in failed!")
+                raise RuntimeError("签到失败!")
 
     except Exception as e:
         logging.error(f"运行过程中发生错误: {e}")
+        with open("failure_flag.txt", "w") as f:
+            f.write("Sign-in failed!")
     finally:
         # 确保浏览器关闭
         logging.info("关闭浏览器...")
