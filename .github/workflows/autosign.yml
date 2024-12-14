@@ -43,6 +43,7 @@ jobs:
       env:
         USER_EMAIL: ${{ secrets.USER_EMAIL }}
         USER_PASSWORD: ${{ secrets.USER_PASSWORD }}
+        LOGIN_URL: ${{ secrets.LOGIN_URL }}
       run: |
         python 2dfan_DrissionPage.py
 
