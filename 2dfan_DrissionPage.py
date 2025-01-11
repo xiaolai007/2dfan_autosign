@@ -93,7 +93,7 @@ def main():
     try:
         # 启动浏览器
         logging.info("启动浏览器...")
-        co = ChromiumOptions()
+        co = ChromiumOptions().auto_port()
         # 禁止所有弹出窗口
         # co.set_pref(arg='profile.default_content_settings.popups', value='0')
         # # 隐藏是否保存密码的提示

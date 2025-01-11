@@ -5,7 +5,6 @@ on:
     branches:
       - main
   schedule:
-    # - cron: '0 19 * * *'  # UTC时间19点对应北京时间3点.
     - cron: '0 22 * * *'  # UTC时间22点对应北京时间6点.
   workflow_dispatch: # 手动触发
 
@@ -22,17 +21,19 @@ jobs:
       with:
         python-version: 3.9
 
+    # 缓存 pip 依赖
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
     - name: Install dependencies
       run: |
-        sudo apt-get update
         sudo apt-get install -y xvfb libx11-dev xauth fonts-noto-cjk  # 安装中文字体
-        python -m pip install --upgrade pip
         pip install -r requirements.txt
-
-    - name: Install X11 utilities
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y x11-utils
         
     - name: Start Xvfb
       run: |
@@ -45,11 +46,6 @@ jobs:
         echo "XAUTHORITY=/home/runner/.Xauthority" >> $GITHUB_ENV
         touch /home/runner/.Xauthority  # 创建空的 Xauthority 文件
         xauth generate :99 . trusted  # 生成 .Xauthority 权限
-
-    - name: Verify Xvfb
-      run: |
-        export DISPLAY=:99
-        xdpyinfo  # 验证 Xvfb 是否正确生成
 
     - name: Run Python script
       env:
