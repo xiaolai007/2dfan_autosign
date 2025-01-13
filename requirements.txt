@@ -2,4 +2,4 @@ opencv-python
 pyautogui
 mss
 pillow
-DrissionPage
+DrissionPage==4.1.0.12

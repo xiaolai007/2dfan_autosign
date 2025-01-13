@@ -93,14 +93,12 @@ def main():
     try:
         # 启动浏览器
         logging.info("启动浏览器...")
-        co = ChromiumOptions().auto_port()
-        # 禁止所有弹出窗口
-        # co.set_pref(arg='profile.default_content_settings.popups', value='0')
-        # # 隐藏是否保存密码的提示
-        # co.set_pref('credentials_enable_service', False)
+        co = ChromiumOptions().set_paths(user_data_path=r'/tmp/chrome_user_data').auto_port()
+        co.incognito(True)  # 启用无痕模式
+        co.set_argument('--no-sandbox')
+        co.set_argument('--disable-gpu')
+        co.set_argument('--disable-dev-shm-usage')
 
-        #设置无痕模式，防止弹出是否保存密码的提示.
-        co.incognito(True)
         tab = ChromiumPage(co)
 
         # 跳转到登录页面
