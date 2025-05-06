@@ -4,6 +4,7 @@ from DrissionPage import ChromiumPage
 from bypass_captcha import CaptchaBypasser
 from DrissionPage import ChromiumOptions
 
+
 # 配置日志记录
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
