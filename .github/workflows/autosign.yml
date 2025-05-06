@@ -56,14 +56,14 @@ jobs:
           echo "Sign-in succeeded."
         fi
         
-    # - name: Upload screenshots as artifacts
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: screenshots
-    #     path: |
-    #       ./screenshot.png
-    #       ./screenshot_detected.png
-    #       ./pic1.png
-    #       ./pic2.png
-    #       ./pic3.png
-    #       ./pic_error.png
+     - name: Upload screenshots as artifacts
+       uses: actions/upload-artifact@v3
+       with:
+         name: screenshots
+         path: |
+           ./screenshot.png
+           ./screenshot_detected.png
+           ./pic1.png
+           ./pic2.png
+           ./pic3.png
+           ./pic_error.png
