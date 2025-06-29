@@ -4,6 +4,7 @@
    + `USER_EMAIL`：你的2dfan邮箱
    + `USER_PASSWORD`：你的2dfan密码
    + `LOGIN_URL`：你的登录地址，需要先用自己账号登录`https://2dfan.com/`，然后点击页面的签到，上方的网址即为需要的地址，格式为：`https://2dfan.com/users/你的ID/recheckin`
+
      
 # 查看截图
 可以取消`autosign.yml`最后的注释，在`Actions`的`Artifacts`下载`screenshots.zip`文件查看。
