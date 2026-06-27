@@ -1,5 +1,9 @@
 name: 2dfan Task Runner
 
+# 需要写权限以便提交文件
+permissions:
+  contents: write
+
 on:
   push:
     branches:
@@ -16,6 +20,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
+      with:
+        fetch-depth: 0   # 为了安全的 pull/commit/push，拉取完整历史
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -51,19 +57,53 @@ jobs:
       run: |
         if [ -f "./failure_flag.txt" ]; then
           echo "Sign-in failed, sending email notification..."
+          # failure_flag.txt 可由脚本写入失败原因
           exit 1
         else
           echo "Sign-in succeeded."
         fi
-        
-     # - name: Upload screenshots as artifacts
-    #   uses: actions/upload-artifact@v3
-    #   with:
-    #     name: screenshots
-    #     path: |
-    #       ./screenshot.png
-    #       ./screenshot_detected.png
-    #       ./pic1.png
-    #       ./pic2.png
-    #       ./pic3.png
-    #       ./pic_error.png
+
+    # ---- 新增：把结果追加到仓库文件并提交 ----
+    - name: Save sign-in result to repo and commit
+      if: always()   # 无论前面的步骤成功失败都要把结果写回仓库
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_REF: ${{ github.ref }}
+      run: |
+        set -e
+
+        # 结果文件
+        RESULT_FILE="results/signin_results.txt"
+        mkdir -p "$(dirname "$RESULT_FILE")"
+
+        TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%SZ")
+        if [ -f "./failure_flag.txt" ]; then
+          STATUS="FAILURE"
+          DETAILS=$(cat failure_flag.txt 2>/dev/null || echo "Sign-in failed")
+        else
+          STATUS="SUCCESS"
+          DETAILS="Signed in successfully"
+        fi
+
+        # 将本次结果追加到文件（保留之前内容）
+        echo "[$TIMESTAMP] $STATUS - $DETAILS" >> "$RESULT_FILE"
+
+        # 如果你想记录更多（例如截屏路径或日志），可以把这些信息也 echo 到 RESULT_FILE
+
+        # 配置 Git 提交信息
+        git config user.name "${GITHUB_ACTOR}"
+        git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+        # 尝试 pull 最新变更以减少冲突（并忽略失败）
+        BRANCH=${GITHUB_REF#refs/heads/}
+        git pull --rebase origin "$BRANCH" || true
+
+        git add "$RESULT_FILE"
+        # 仅当有改动时再 commit，否则跳过
+        if git diff --cached --quiet; then
+          echo "No changes to commit for $RESULT_FILE"
+        else
+          git commit -m "Update sign-in result: $TIMESTAMP"
+          git push origin "$BRANCH"
+        fi
