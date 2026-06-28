@@ -24,7 +24,7 @@ def locate_button(ele, tag="tag:svg", retries=MAX_RETRIES):
             else:
                 logging.warning(f"按钮为空，重新尝试定位 (尝试次数: {attempt + 1})")
         except Exception as e:
-            logging.error(f"定位按钮时出错: {e} (尝试次数: {attempt + 1})")
+            logging.error(f"定位按钮��出错: {e} (尝试次数: {attempt + 1})")
         time.sleep(1)
     raise RuntimeError("按钮定位失败，已达到最大重试次数")
 
@@ -92,6 +92,7 @@ def login_process(tab):
         raise RuntimeError("未找到登录按钮")
     
 def main():
+    tab = None
     try:
         # 启动浏览器
         logging.info("启动浏览器...")
@@ -101,7 +102,28 @@ def main():
         co.set_argument('--disable-gpu')
         co.set_argument('--disable-dev-shm-usage')
 
-        tab = ChromiumPage(co)
+        # 如果在 CI 或无 DISPLAY 环境下，启用 headless
+        if os.getenv('CI') or not os.getenv('DISPLAY'):
+            logging.info("检测到 CI 或无显示环境，启用 headless 模式")
+            co.set_argument('--headless=new')
+
+        # 尝试启动浏览器，失败时回退到新的 user_data_path 并强制 headless
+        try:
+            tab = ChromiumPage(co)
+        except Exception as e:
+            logging.warning(f"首次启动浏览器失败：{e}，尝试使用不同的 user_data_path 与 headless 再次启动")
+            try:
+                co = ChromiumOptions().set_paths(user_data_path=f'/tmp/chrome_user_data_{int(time.time())}').auto_port()
+                co.incognito(True)
+                co.set_argument('--no-sandbox')
+                co.set_argument('--disable-gpu')
+                co.set_argument('--disable-dev-shm-usage')
+                co.set_argument('--headless=new')
+                tab = ChromiumPage(co)
+                logging.info("回退方式启动浏览器成功")
+            except Exception as e2:
+                logging.error(f"回退启动也失败：{e2}")
+                raise
 
         # 跳转到登录页面
         logging.info("跳转到登录页面...")
@@ -223,8 +245,14 @@ def main():
     finally:
         # 确保浏览器关闭
         logging.info("关闭浏览器...")
-        tab.close()
-        logging.info("浏览器已关闭")
+        try:
+            if tab:
+                tab.close()
+                logging.info("浏览器已关闭")
+            else:
+                logging.info("tab 未创建，无需关闭浏览器")
+        except Exception as e:
+            logging.warning(f"关闭浏览器时出错: {e}")
 
 if __name__ == "__main__":
     main()
