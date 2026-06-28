@@ -73,7 +73,9 @@ def login_process(tab):
     logging.info("运行验证码绕过程序...")
     captcha_bypasser.run()
 
-    # 检验是否成功
+    # 重新抓取输入元素（DOM 可能已变），然后检验是否成功
+    tab.wait.eles_loaded("tag:input")
+    eles = tab.eles("tag:input")
     button = process_captcha(tab, eles, tag="tag:circle")
     tab.wait.ele_displayed(button)
     logging.info("验证成功")
@@ -158,34 +160,60 @@ def main():
             captcha_bypasser = CaptchaBypasser()
             captcha_bypasser.run()
 
-            # 检验是否成功
+            # 重新抓取输入元素（DOM 可能已变），然后检验是否成功
+            tab.wait.eles_loaded("tag:input")
+            eles = tab.eles("tag:input")
             button = process_captcha(tab, eles, tag="tag:circle")
             tab.wait.ele_displayed(button)
             logging.info("验证成功")
             tab.wait(2)
             tab.get_screenshot(name='pic3.png', full_page=True)
 
-            # 点击签到按钮
+            # 更可靠地定位签到按钮（按文本优先，然后回退到 type/class）
             logging.info("查找并点击签到按钮...")
-            checkin_button = tab.ele('@type=submit')
-            if checkin_button:
-                checkin_button.click()
-                logging.info("签到按钮已点击")
-            else:
+            checkin_button = tab.ele("text:签到") or tab.ele('@type=submit') or tab.ele('css:.checkin, css:.sign-in')
+            if not checkin_button:
+                # 尝试从所有 submit 元素中选择第一个可见的
+                candidates = tab.eles('@type=submit')
+                for c in candidates:
+                    try:
+                        if c.is_displayed():
+                            checkin_button = c
+                            break
+                    except Exception:
+                        continue
+
+            if not checkin_button:
+                logging.error("未找到签到按钮，保存页面截图以供调试")
+                tab.get_screenshot(name='no_checkin_button.png', full_page=True)
                 raise RuntimeError("未找到签到按钮")
 
-            tab.wait(5)
-            tab.refresh()
-            tab.wait.doc_loaded()
-            tab.wait(3)
-            logging.info("刷新页面成功")
+            # 点击并等待“今日已签到”出现（重试多次）
+            success = False
+            for attempt in range(3):
+                try:
+                    checkin_button.click()
+                except Exception as e:
+                    logging.warning(f"点击签到按钮时出错 (尝试 {attempt+1}): {e}")
+                logging.info(f"签到按钮已点击 (尝试 {attempt+1})")
+                tab.get_screenshot(name=f'after_checkin_click_{attempt+1}.png', full_page=True)
 
-            # 检测签到状态
-            checkin_status = tab.ele('text:今日已签到')
-            if checkin_status:
-                logging.info("签到成功！")
-            else:
-                logging.info("签到失败！")
+                # 等待最多 10 秒查看页面上是否出现“今日已签到”
+                for _ in range(10):
+                    tab.wait(1)
+                    if tab.ele('text:今日已签到'):
+                        logging.info("检测到签到成功标识")
+                        success = True
+                        break
+                if success:
+                    break
+                else:
+                    logging.warning("未检测到签到成功标识；短暂等待后重试")
+                    tab.wait(1)
+
+            if not success:
+                logging.info("签到失败，保存调试截图并抛出异常")
+                tab.get_screenshot(name='checkin_failed_final.png', full_page=True)
                 raise RuntimeError("签到失败!")
 
     except Exception as e:
