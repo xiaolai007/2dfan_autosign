@@ -24,7 +24,7 @@ def locate_button(ele, tag="tag:svg", retries=MAX_RETRIES):
             else:
                 logging.warning(f"按钮为空，重新尝试定位 (尝试次数: {attempt + 1})")
         except Exception as e:
-            logging.error(f"定位按钮��出错: {e} (尝试次数: {attempt + 1})")
+            logging.error(f"定位按钮时出错: {e} (尝试次数: {attempt + 1})")
         time.sleep(1)
     raise RuntimeError("按钮定位失败，已达到最大重试次数")
 
@@ -41,6 +41,72 @@ def process_captcha(tab, eles, tag="tag:circle"):
                 return button
     raise RuntimeError("未找到验证码相关按钮")
 
+def find_login_input(tab, timeout=20):
+    """尝试多种定位策略寻找登录输入框；超时返回 None。"""
+    end = time.time() + timeout
+    candidate_locators = [
+        '@name=login', '@id=login', '@name=email', '@id=email',
+        'tag:input[type=email]', 'tag:input[type=text]', 'text:邮箱', 'text:Email'
+    ]
+    while time.time() < end:
+        # 先尝试常用定位器
+        for loc in candidate_locators:
+            try:
+                ele = tab.ele(loc)
+                if ele:
+                    logging.info(f"找到登录输入元素：{loc}")
+                    return ele
+            except Exception as ex:
+                logging.debug(f"尝试定位 {loc} 时异常: {ex}")
+        # 回退：枚举所有 input，打印属性，尝试根据 placeholder/name/id 匹配
+        try:
+            inputs = tab.eles('tag:input')
+            for idx, inp in enumerate(inputs):
+                try:
+                    attrs = getattr(inp, 'attrs', None)
+                    logging.debug(f"input[{idx}] attrs: {attrs}")
+                    # 简单尝试：如果 name 或 placeholder 看起来像 email/login 就返回
+                    if attrs:
+                        name = attrs.get('name','') or attrs.get('id','') or attrs.get('placeholder','')
+                        if any(k in name.lower() for k in ('login','email','帐号','帐户','账号','用户名')):
+                            logging.info(f"通过属性匹配到输入框: input[{idx}] attrs={attrs}")
+                            return inp
+                except Exception:
+                    continue
+        except Exception as ex:
+            logging.debug(f"列出 inputs 时异常: {ex}")
+        tab.wait(1)
+    return None
+
+def find_password_input(tab, timeout=10):
+    """在页面上寻找密码输入框，超时返回 None。"""
+    end = time.time() + timeout
+    candidate = ['@name=password', '@id=password', 'tag:input[type=password]', "text:密码"]
+    while time.time() < end:
+        for loc in candidate:
+            try:
+                ele = tab.ele(loc)
+                if ele:
+                    logging.info(f"找到密码输入元素：{loc}")
+                    return ele
+            except Exception as ex:
+                logging.debug(f"尝试定位 {loc} 时异常: {ex}")
+        # 回退：枚举所有 input[type=password]
+        try:
+            inputs = tab.eles('tag:input')
+            for idx, inp in enumerate(inputs):
+                try:
+                    attrs = getattr(inp, 'attrs', None)
+                    if attrs and attrs.get('type','').lower() == 'password':
+                        logging.info(f"通过属性匹配到密码框: input[{idx}] attrs={attrs}")
+                        return inp
+                except Exception:
+                    continue
+        except Exception as ex:
+            logging.debug(f"列出 inputs 时异常: {ex}")
+        tab.wait(1)
+    return None
+
 def login_process(tab):
     """
     执行登录的输入账号、密码和验证码绕过的流程。
@@ -50,14 +116,40 @@ def login_process(tab):
     if not user_email:
         raise ValueError("环境变量 USER_EMAIL 未设置")
     logging.info(f"输入账号: {user_email}")
-    tab.ele('@name=login').input(user_email)
+
+    # 更稳健地查找登录输入框
+    input_ele = find_login_input(tab, timeout=20)
+    if not input_ele:
+        logging.error("未能定位登录输入框，保存页面截图以供调试")
+        try:
+            tab.get_screenshot(name='login_not_found.png', full_page=True)
+        except Exception:
+            logging.debug("截图失败")
+        raise RuntimeError('未找到登录输入框')
+    # 找到后输入账号
+    input_ele.input(user_email)
 
     # 输入密码
     user_password = os.getenv("USER_PASSWORD", "")
     if not user_password:
         raise ValueError("环境变量 USER_PASSWORD 未设置")
     logging.info("输入密码")
-    tab.ele('@name=password').input(user_password)
+
+    pwd_ele = find_password_input(tab, timeout=10)
+    if not pwd_ele:
+        # 退回到简单定位
+        try:
+            pwd_ele = tab.ele('@name=password')
+        except Exception:
+            pwd_ele = None
+    if not pwd_ele:
+        logging.error("未能定位密码输入框，保存页面截图以供调试")
+        try:
+            tab.get_screenshot(name='password_not_found.png', full_page=True)
+        except Exception:
+            logging.debug("截图失败")
+        raise RuntimeError('未找到密码输入框')
+    pwd_ele.input(user_password)
 
     # 验证验证码
     tab.wait.eles_loaded("tag:input")
@@ -102,10 +194,13 @@ def main():
         co.set_argument('--disable-gpu')
         co.set_argument('--disable-dev-shm-usage')
 
-        # 如果在 CI 或无 DISPLAY 环境下，启用 headless
-        if os.getenv('CI') or not os.getenv('DISPLAY'):
-            logging.info("检测到 CI 或无显示环境，启用 headless 模式")
+        # 是否启用 headless：仅当 HEADLESS 环境变量显式为 true/1/yes 时才启用
+        headless_env = os.getenv('HEADLESS', '').lower()
+        if headless_env in ('1', 'true', 'yes'):
+            logging.info("HEADLESS 环境变量为真，启用 headless 模式")
             co.set_argument('--headless=new')
+        else:
+            logging.info("未设置 HEADLESS，保留默认（非强制 headless）运行模式")
 
         # 尝试启动浏览器，失败时回退到新的 user_data_path 并强制 headless
         try:
